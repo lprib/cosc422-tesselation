@@ -15,7 +15,7 @@ load_tga(char* filename)
     FILE* file = fopen(filename, "rb");
     if (file == NULL) {
         printf("error opening file %s\n", filename);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     fread(&id, sizeof(id), 1, file);
     fread(&cmap, sizeof(cmap), 1, file);
@@ -23,7 +23,7 @@ load_tga(char* filename)
 
     if (imgtype != 2 && imgtype != 3) {
         printf("Incompatible image type\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     fread(&s_garb, sizeof(s_garb), 1, file);
@@ -87,7 +87,7 @@ load_bmp(char* filename)
     file = fopen(filename, "rb");
     if (file == NULL) {
         printf("error opening file %s\n", filename);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     fread(header1, sizeof(header1), 1, file);

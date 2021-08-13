@@ -1,0 +1,33 @@
+#version 400
+
+layout(vertices = 4) out;
+
+uniform vec3 camera_pos;
+
+void main()
+{
+    vec4 patch_center = (    gl_in[0].gl_Position 
+                  + gl_in[1].gl_Position 
+                  + gl_in[2].gl_Position 
+                  + gl_in[3].gl_Position ) * 0.25;
+
+    float dist = distance(vec4(camera_pos, 0.0), patch_center);
+    float dmin = 30.0;
+    float dmax = 80.0;
+    float tess_min = 2.0;
+    float tess_max = 40.0;
+
+    int level = int(clamp((dist - dmin) / (dmax - dmin) * (tess_min - tess_max) + tess_max, tess_min, tess_max));
+    // int level = int(camera_pos.x);
+
+    gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+    gl_TessLevelOuter[0] = level;
+    gl_TessLevelOuter[1] = level;
+    gl_TessLevelOuter[2] = level;
+    gl_TessLevelOuter[3] = level;
+    gl_TessLevelInner[0] = level;
+    gl_TessLevelInner[1] = level;
+}
+
+// vim: set ft=glsl:
+

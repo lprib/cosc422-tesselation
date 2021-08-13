@@ -16,7 +16,7 @@ GLuint camera_pos_uniform;
 int old_elapsed_time = 0;
 
 // Conversion from degrees to rad (required in GLM 0.9.6)
-float deg_to_rad = 3.14159265 / 180.0;
+float CDR = 3.14159265 / 180.0;
 
 // 10x10 grid (100 vertices)
 float verts[100 * 3];
@@ -25,6 +25,9 @@ float verts[100 * 3];
 GLushort elems[81 * 4];
 
 mat4 proj_matrix, view_matrix;
+
+vec3 camera_pos = {0.0, 20.0, 30.0};
+vec3 camera_look_at = {0.0, 0.0, -40.0};
 
 void
 generate_data()
@@ -77,13 +80,12 @@ init()
         "src/shaders/terrain.cont", "src/shaders/terrain.eval");
     glUseProgram(program);
 
-    GLuint height_map_uniform = glGetUniformLocation(program, "height_map");
-    glUniform1i(height_map_uniform, 0);
-
     mvp_matrix_uniform = glGetUniformLocation(program, "mvp_matrix");
+    GLuint height_map_uniform = glGetUniformLocation(program, "height_map");
     camera_pos_uniform = glGetUniformLocation(program, "camera_pos");
-
-    glm_perspective(30.0 * deg_to_rad, 1.25, 20.0, 500.0, proj_matrix);
+    glUniform1i(height_map_uniform, 0);
+    glm_perspective(30.0 * CDR, 1.25, 20.0, 500.0, proj_matrix);
+    glm_lookat(camera_pos, camera_look_at, (vec3){0.0, 1.0, 0.0}, view_matrix);
 
     generate_data();
 
@@ -122,6 +124,8 @@ update(int value)
     camera_update(deltaSeconds);
     vec4* new_view_matrix = camera_get_view_matrix();
     glm_mat4_copy(new_view_matrix, view_matrix);
+    float* new_camera_pos = camera_get_pos();
+    glm_vec3_copy(new_camera_pos, camera_pos);
 }
 
 void
@@ -132,11 +136,7 @@ display()
 
     glUniformMatrix4fv(
         mvp_matrix_uniform, 1, GL_FALSE, &proj_view_matrix[0][0]);
-
-    float* new_camera_pos = camera_get_pos();
-    glUniform3f(
-        camera_pos_uniform, new_camera_pos[0], new_camera_pos[1],
-        new_camera_pos[2]);
+    glUniform3fv(camera_pos_uniform, 3, camera_pos);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(vao_id);

@@ -1,7 +1,7 @@
 IndentWidth: 4
 DerivePointerAlignment: false
 PointerAlignment: Left
-AlignAfterOpenBracket: DontAlign
+AlignAfterOpenBracket: AlwaysBreak
 
 # Braces on the same line, except for functions
 BreakBeforeBraces: Linux
