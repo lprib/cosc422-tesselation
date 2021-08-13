@@ -1,0 +1,13 @@
+IndentWidth: 4
+DerivePointerAlignment: false
+PointerAlignment: Left
+AlignAfterOpenBracket: DontAlign
+
+# Braces on the same line, except for functions
+BreakBeforeBraces: Linux
+
+AlwaysBreakAfterReturnType: All
+
+SortIncludes: false
+
+# vim: set filetype=yaml:

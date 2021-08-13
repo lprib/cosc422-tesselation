@@ -1,9 +1,8 @@
-
 SRC_FILES = $(wildcard src/*.c)
+# Object files are the same as source files, but in out/ with .o extension
 OBJ_FILES = $(addprefix out/,$(notdir $(SRC_FILES:.c=.o)))
 MAIN_TARGET = out/main
-
-CFLAGS = -lGL -lGLU -lglut -lm
+CFLAGS = -lGL -lGLU -lGLEW -lglut -lm
 
 out/%.o: src/%.c
 	gcc $(CFLAGS) -c $< -o $@
