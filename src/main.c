@@ -83,7 +83,7 @@ init()
     mvp_matrix_uniform = glGetUniformLocation(program, "mvp_matrix");
     camera_pos_uniform = glGetUniformLocation(program, "camera_pos");
 
-    glm_perspective(30.0 * deg_to_rad, 1.25, 20.0, 500.0, proj_matrix);
+    glm_perspective(30.0 * deg_to_rad, 1.25, 5.0, 500.0, proj_matrix);
 
     generate_data();
 
