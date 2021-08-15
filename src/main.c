@@ -19,7 +19,7 @@ init()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    /* glClearColor(1.0f, 1.0f, 1.0f, 1.0f); */
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     terrain_init();

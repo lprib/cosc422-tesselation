@@ -79,10 +79,12 @@ terrain_init()
     height_map_uniform = glGetUniformLocation(program, "height_map");
     GLuint object_bounds_uniform =
         glGetUniformLocation(program, "object_bounds");
+    GLuint light_pos_uniform = glGetUniformLocation(program, "light_pos");
 
     glUniform4f(
         object_bounds_uniform, 0, MAP_WIDTH * VERT_SPACING, 0,
         MAP_HEIGHT * VERTS_PER_PATCH);
+    glUniform3f(light_pos_uniform, 0.0, 0.0, 0.0);
     glUniform1i(height_map_uniform, 0);
 
     glGenVertexArrays(1, &vao_id);

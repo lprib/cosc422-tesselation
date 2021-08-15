@@ -15,7 +15,7 @@ void main()
     float dmin = 30.0;
     float dmax = 80.0;
     float tess_min = 2.0;
-    float tess_max = 40.0;
+    float tess_max = 140.0;
 
     int level = int(clamp((dist - dmin) / (dmax - dmin) * (tess_min - tess_max) + tess_max, tess_min, tess_max));
     // int level = int(camera_pos.x);

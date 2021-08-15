@@ -8,27 +8,33 @@ uniform sampler2D height_map;
 // x: xmin, y: xmax, z: zmin, w: zmax
 uniform vec4 object_bounds;
 
+out VERTEX_DATA {
+    vec4 world_position;
+} vertex;
+
 void main()
 {
-    vec4 posn;
+    vec4 tesselated_position;
     vec2 tcoord;
 
 
     float u = gl_TessCoord.x;
     float v = gl_TessCoord.y;
 
-    posn = (1-u) * (1-v) *  gl_in[0].gl_Position
+    tesselated_position = (1-u) * (1-v) *  gl_in[0].gl_Position
         + u * (1-v) *       gl_in[1].gl_Position
         + u * v *           gl_in[2].gl_Position
         + (1-u) * v *       gl_in[3].gl_Position;
 
-    tcoord.s = (posn.x - object_bounds.x) / (object_bounds.y - object_bounds.x);
-    tcoord.t = (posn.z - object_bounds.z) / (object_bounds.w - object_bounds.z);
+    tcoord.s = (tesselated_position.x - object_bounds.x) / (object_bounds.y - object_bounds.x);
+    tcoord.t = (tesselated_position.z - object_bounds.z) / (object_bounds.w - object_bounds.z);
 
     float height = texture(height_map, tcoord).r;
-    posn.y = height * 10.0;
+    tesselated_position.y = height * 10.0;
 
-    gl_Position = mvp_matrix * posn;
+    vertex.world_position = tesselated_position;
+    gl_Position = mvp_matrix * tesselated_position;
+    // gl_Position = tesselated_position;
 }
 
 // vim: set ft=glsl:
