@@ -19,7 +19,6 @@ void main()
 
     int level = int(clamp((dist - dmin) / (dmax - dmin) * (tess_min - tess_max) + tess_max, tess_min, tess_max));
     // int level = int(camera_pos.x);
-
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
     gl_TessLevelOuter[0] = level;
     gl_TessLevelOuter[1] = level;

@@ -20,6 +20,7 @@ load_shader(GLenum shader_type, char* filename)
 
     char* file_string = malloc(file_size + 1);
     fread(file_string, 1, file_size, file);
+    file_string[file_size] = 0;
     fclose(file);
 
     const char* file_string_const = (const char*)file_string;
@@ -48,18 +49,18 @@ load_shader(GLenum shader_type, char* filename)
 // Returns the program id
 GLint
 compile_program(
-    char* vertex_filename, char* fragment_filename, char* tess_control_filename,
-    char* tess_eval_filename)
+    char* vert_filename, char* frag_filename, char* tess_control_filename,
+    char* tess_eval_filename, char* geom_filename)
 {
     GLuint program = glCreateProgram();
     GLuint shader;
 
-    if (vertex_filename != NULL) {
-        shader = load_shader(GL_VERTEX_SHADER, vertex_filename);
+    if (vert_filename != NULL) {
+        shader = load_shader(GL_VERTEX_SHADER, vert_filename);
         glAttachShader(program, shader);
     }
-    if (fragment_filename != NULL) {
-        shader = load_shader(GL_FRAGMENT_SHADER, fragment_filename);
+    if (frag_filename != NULL) {
+        shader = load_shader(GL_FRAGMENT_SHADER, frag_filename);
         glAttachShader(program, shader);
     }
     if (tess_control_filename != NULL) {
@@ -68,6 +69,10 @@ compile_program(
     }
     if (tess_eval_filename != NULL) {
         shader = load_shader(GL_TESS_EVALUATION_SHADER, tess_eval_filename);
+        glAttachShader(program, shader);
+    }
+    if (geom_filename != NULL) {
+        shader = load_shader(GL_GEOMETRY_SHADER, geom_filename);
         glAttachShader(program, shader);
     }
 

@@ -11,12 +11,12 @@
 #define LOOK_DISTANCE 90.0
 
 // camera angle
-static double angle = 0;
-static vec3 pos = {0.0, 15.0, 30.0};
+static double angle = M_PI / 4.0;
+static vec3 pos = {0.0, 15.0, 0.0};
 
 // look vector
 static double look_x = 0.0;
-static double look_z = -1.0;
+static double look_z = 0.0;
 
 static mat4 view_matrix;
 
@@ -61,11 +61,19 @@ camera_special_keys_up(int key, int x, int y)
 }
 
 void
+update_look_dir()
+{
+    look_x = sin(angle);
+    look_z = -cos(angle);
+}
+
+void
 camera_init()
 {
     glutIgnoreKeyRepeat(true);
     glutSpecialFunc(&camera_special_keys);
     glutSpecialUpFunc(&camera_special_keys_up);
+    update_look_dir();
 }
 
 void
@@ -74,16 +82,14 @@ camera_update(double delta)
     // left
     if (keysDown[0]) {
         angle -= ANGLE_SPEED * delta;
-        look_x = sin(angle);
-        look_z = -cos(angle);
+        update_look_dir();
         glutPostRedisplay();
     }
 
     // right
     if (keysDown[1]) {
         angle += ANGLE_SPEED * delta;
-        look_x = sin(angle);
-        look_z = -cos(angle);
+        update_look_dir();
         glutPostRedisplay();
     }
 
@@ -111,9 +117,6 @@ camera_get_view_matrix()
             pos[0] + LOOK_DISTANCE * look_x, 1.0f,
             pos[2] + LOOK_DISTANCE * look_z},
         (vec3){0.0f, 1.0f, 0.0f}, view_matrix);
-    /* glm_lookat( */
-    /* (vec3){0.0, 20.0, 30.0}, (vec3){0.0, 0.0f, -40.0}, */
-    /* (vec3){0.0f, 1.0f, 0.0f}, view_matrix); */
     return view_matrix;
 }
 

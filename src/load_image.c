@@ -7,9 +7,9 @@
 void
 load_tga(char* filename)
 {
-    char id, cmap, imgtype, bpp, c_garb;
-    char *image_data, temp;
-    short int s_garb, wid, hgt;
+    char id, cmap, imgtype, bpp, c_garb, temp;
+    char* image_data;
+    short int s_garb, width, height;
     int nbytes, size, index;
 
     FILE* file = fopen(filename, "rb");
@@ -33,21 +33,21 @@ load_tga(char* filename)
     fread(&s_garb, sizeof(s_garb), 1, file);
     fread(&s_garb, sizeof(s_garb), 1, file);
 
-    fread(&wid, sizeof(wid), 1, file);
-    fread(&hgt, sizeof(hgt), 1, file);
+    fread(&width, sizeof(width), 1, file);
+    fread(&height, sizeof(height), 1, file);
 
     fread(&bpp, sizeof(bpp), 1, file);
     fread(&c_garb, sizeof(c_garb), 1, file);
 
     nbytes = bpp / 8;
-    size = wid * hgt * nbytes;
-    printf("%d %d %d\n", wid, hgt, size);
+    size = width * height * nbytes;
+    printf("%d %d %d %d\n", width, height, size, nbytes);
     image_data = (char*)malloc(sizeof(char) * size);
-    fread(&image_data, sizeof(char), size, file);
+    fread(image_data, sizeof(char), size, file);
 
-    if (nbytes > 2) // swap R and B
-    {
-        for (int i = 0; i < wid * hgt; i++) {
+    // swap R and B
+    if (nbytes > 2) {
+        for (int i = 0; i < width * height; i++) {
             index = i * nbytes;
             temp = image_data[index];
             image_data[index] = image_data[index + 2];
@@ -57,19 +57,21 @@ load_tga(char* filename)
 
     switch (nbytes) {
     case 1:
-        glTexImage2D(GL_TEXTURE_2D, 0, 1, wid, hgt, 0, GL_LUMINANCE,
+        glTexImage2D(
+            GL_TEXTURE_2D, 0, 1, width, height, 0, GL_LUMINANCE,
             GL_UNSIGNED_BYTE, image_data);
         break;
     case 3:
-        glTexImage2D(GL_TEXTURE_2D, 0, 3, wid, hgt, 0, GL_RGB, GL_UNSIGNED_BYTE,
+        glTexImage2D(
+            GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE,
             image_data);
         break;
     case 4:
-        glTexImage2D(GL_TEXTURE_2D, 0, 4, wid, hgt, 0, GL_RGBA,
-            GL_UNSIGNED_BYTE, image_data);
+        glTexImage2D(
+            GL_TEXTURE_2D, 0, 4, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+            image_data);
         break;
     }
-    printf("here\n");
     free(image_data);
 }
 
@@ -110,7 +112,8 @@ load_bmp(char* filename)
         imageData[index] = imageData[index + 2];
         imageData[index + 2] = temp;
     }
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB,
-        GL_UNSIGNED_BYTE, imageData);
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE,
+        imageData);
     free(imageData);
 }

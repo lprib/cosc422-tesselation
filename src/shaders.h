@@ -8,7 +8,8 @@ GLuint
 load_shader(GLenum shader_type, char* filename);
 
 GLint
-compile_program(char* vertex_filename, char* fragment_filename,
-    char* tess_control_filename, char* tess_eval_filename);
+compile_program(
+    char* vert_filename, char* frag_filename, char* tess_control_filename,
+    char* tess_eval_filename, char* geom_filename);
 
 #endif
