@@ -9,6 +9,11 @@ GLuint vao_id;
 GLuint mvp_matrix_uniform;
 GLuint camera_pos_uniform;
 
+#define WATER_ANIMATION_LENGTH 32
+GLuint water_normal_uniform;
+int water_animation_start;
+int water_animation_offset = 0;
+
 #define MAP_WIDTH 10
 #define MAP_HEIGHT 10
 #define VERT_SPACING 10
@@ -59,6 +64,25 @@ void load_texture(GLuint uniform, GLuint texture_unit, char* filename)
     glUniform1i(uniform, texture_unit);
 }
 
+void load_water_textures(GLuint first_texture_unit)
+{
+    water_animation_start = first_texture_unit;
+    GLuint water_textures[WATER_ANIMATION_LENGTH];
+    glGenTextures(WATER_ANIMATION_LENGTH, water_textures);
+
+    for (int i = 0; i < WATER_ANIMATION_LENGTH; i++) {
+        glActiveTexture(GL_TEXTURE0 + first_texture_unit + i);
+        glBindTexture(GL_TEXTURE_2D, water_textures[i]);
+        char filename[30];
+        snprintf(filename, 30, "assets/water_normal/%04d.bmp", i + 1);
+        printf("loading %s\n", filename);
+        load_bmp(filename);
+
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    }
+}
+
 void terrain_init()
 {
     generate_data();
@@ -73,6 +97,7 @@ void terrain_init()
 
     mvp_matrix_uniform = glGetUniformLocation(program, "mvp_matrix");
     camera_pos_uniform = glGetUniformLocation(program, "camera_pos");
+    water_normal_uniform = glGetUniformLocation(program, "water_normal");
 
     glUniform4f(
         glGetUniformLocation(program, "object_bounds"),
@@ -81,7 +106,11 @@ void terrain_init()
         0.0,
         -(MAP_WIDTH - 1) * VERT_SPACING);
 
-    glUniform3f(glGetUniformLocation(program, "light_pos"), -50.0, 30.0, 50.0);
+    glUniform3f(
+        glGetUniformLocation(program, "light_pos"),
+        -100.0,
+        100.0,
+        100.0);
     glUniform1f(
         glGetUniformLocation(program, "patch_point_spacing"),
         VERT_SPACING);
@@ -102,6 +131,8 @@ void terrain_init()
         glGetUniformLocation(program, "snow_tex"),
         3,
         "assets/snow.bmp");
+    load_water_textures(4);
+    glUniform1i(water_normal_uniform, 4);
 
     glGenVertexArrays(1, &vao_id);
     glBindVertexArray(vao_id);
@@ -146,4 +177,19 @@ void terrain_display(mat4 view_proj_matrix, vec3 camera_pos)
         NUM_PATCHES * VERTS_PER_PATCH,
         GL_UNSIGNED_SHORT,
         NULL);
+}
+
+double running_delta = 0.0;
+double framerate = 15.0;
+void terrain_update(double delta)
+{
+    running_delta += delta;
+    if (running_delta > 1 / framerate) {
+        running_delta -= 1 / framerate;
+        water_animation_offset++;
+        glUniform1i(
+            water_normal_uniform,
+            water_animation_start + water_animation_offset % 32);
+        glutPostRedisplay();
+    }
 }

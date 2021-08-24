@@ -12,9 +12,7 @@ const float tess_max = 100.0;
 
 int get_tess_level(vec4 center) {
     float dist = distance(vec4(camera_pos, 0.0), center);
-
     int level = int(clamp((dist - dmin) / (dmax - dmin) * (tess_min - tess_max) + tess_max, tess_min, tess_max));
-    // level = 100;
     return level;
 }
 
@@ -28,14 +26,13 @@ void main()
 
     int level = get_tess_level(patch_center);
 
-    // TODO this must correspond to patch size
     vec4 off = vec4(patch_point_spacing, 0., 0., 0.);
     int base_level = get_tess_level(patch_center);
     int level_left = max(level, get_tess_level(patch_center - off.xyyy));
     int level_down = max(level, get_tess_level(patch_center - off.yyxy));
     int level_right = max(level, get_tess_level(patch_center + off.xyyy));
     int level_up = max(level, get_tess_level(patch_center + off.yyxy));
-    // level = 1;
+
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
     gl_TessLevelOuter[0] = level_left;
     gl_TessLevelOuter[3] = level_down;

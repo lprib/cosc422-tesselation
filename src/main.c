@@ -31,6 +31,7 @@ void update(int value)
     old_elapsed_time = elapsed_time;
     glutTimerFunc(16, &update, 0);
     double deltaSeconds = delta / 1000.0;
+    terrain_update(deltaSeconds);
     camera_update(deltaSeconds);
 }
 

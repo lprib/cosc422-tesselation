@@ -9,59 +9,102 @@ uniform sampler2D height_map;
 uniform vec4 object_bounds;
 
 out VERTEX_DATA {
-    vec4 world_position;
-    vec3 normal;
+   vec4 world_position;
+   vec3 normal;
+   vec2 tex_coords;
+   vec4 tex_weights;
 } vertex;
 
-vec3 get_normal(vec2 tex_coord, float texel_size, float texel_aspect) {
-    vec4 h;
-    h.x = texture(height_map, tex_coord + texel_size*vec2(0., -1.)).r * texel_aspect;
-    h.y = texture(height_map, tex_coord + texel_size*vec2(-1., 0.)).r * texel_aspect;
-    h.z = texture(height_map, tex_coord + texel_size*vec2(1., 0.)).r * texel_aspect;
-    h.w = texture(height_map, tex_coord + texel_size*vec2(0., 1.)).r * texel_aspect;
+vec3 get_normal(vec2 tex_coords, float texel_size, float texel_aspect) {
+   vec4 h;
+   h.x = texture(height_map, tex_coords + texel_size*vec2(0., -1.)).r * texel_aspect;
+   h.y = texture(height_map, tex_coords + texel_size*vec2(-1., 0.)).r * texel_aspect;
+   h.z = texture(height_map, tex_coords + texel_size*vec2(1., 0.)).r * texel_aspect;
+   h.w = texture(height_map, tex_coords + texel_size*vec2(0., 1.)).r * texel_aspect;
 
-    vec3 n;
-    n.z = h.x - h.w;
-    n.x = h.y - h.z;
-    n.y = 2;
+   vec3 n;
+   n.z = h.x - h.w;
+   n.x = h.y - h.z;
+   n.y = 2;
 
-    return normalize(n);
+   return normalize(n);
 }
 
-vec4 get_heightmap_pos(vec4 tesselated_position, vec2 tex_coord, float max_height) {
-    vec4 heighmap_position;
-    float height = texture(height_map, tex_coord).r * max_height;
+// x = sand, y = grass, z = snow, w = water (bool)
+vec4 get_texture_weights(float h, float water_level) {
+   // transitions happen AFTER the boundary has been passed
+   const float boundary_1 = 0.3;
+   const float transition_1 = 0.05;
+   const float boundary_2 = 0.6;
+   const float transition_2 = 0.3;
 
-    return vec4(tesselated_position.x, height, tesselated_position.z, 1.);
+   const float transition_water = 0.01;
+
+   vec4 ret;
+   if(h < boundary_1) {
+      ret = vec4(1., 0., 0., 0.);
+   } else if(h < boundary_1 + transition_1) {
+      float lerp_val = (h - boundary_1) / transition_1;
+      ret = mix(vec4(1., 0., 0., 0.), vec4(0., 1., 0., 0.), lerp_val);
+   } else if(h < boundary_2) {
+      ret = vec4(0., 1., 0., 0.);
+   } else if(h < boundary_2 + transition_2) {
+      float lerp_val = (h - boundary_2) / transition_2;
+      ret = mix(vec4(0., 1., 0., 0.), vec4(0., 0., 1., 0.), lerp_val);
+   } else {
+      ret = vec4(0., 0., 1., 0.);
+   }
+
+   if(h < water_level) {
+      ret = vec4(0., 0., 0., 1.);
+   } else if (h < water_level + transition_water) {
+      float lerp_val = (h - water_level) / transition_water;
+      ret = mix(ret, vec4(0., 0., 0., 1.), 1-lerp_val);
+   }
+   return ret;
 }
 
 void main()
 {
-    vec4 tesselated_position;
-    vec2 tex_coord;
-    float u = gl_TessCoord.x;
-    float v = gl_TessCoord.y;
-    float max_height = 10.;
-    float texture_width = 1024.;
-    float normal_texel_size = 5./texture_width;
+   vec4 tesselated_position;
+   vec2 tex_coords;
+   float u = gl_TessCoord.x;
+   float v = gl_TessCoord.y;
+   // scale of 0 to 1
+   const float water_level = 0.5;
+   const float max_height = 10.;
+   const float texture_width = 1024.;
+   const float normal_texel_size = 1./texture_width;
 
-    tesselated_position = (1-u) * (1-v) *  gl_in[0].gl_Position
-        + u * (1-v) *       gl_in[1].gl_Position
-        + u * v *           gl_in[2].gl_Position
-        + (1-u) * v *       gl_in[3].gl_Position;
+   tesselated_position = (1-u) * (1-v) *  gl_in[0].gl_Position
+      + u * (1-v) *      gl_in[1].gl_Position
+      + u * v *          gl_in[2].gl_Position
+      + (1-u) * v *      gl_in[3].gl_Position;
 
-    tex_coord.s = (tesselated_position.x - object_bounds.x) / (object_bounds.y - object_bounds.x);
-    tex_coord.t = (tesselated_position.z - object_bounds.z) / (object_bounds.w - object_bounds.z);
-    tex_coord.s = clamp(tex_coord.s, normal_texel_size, 1-normal_texel_size);
-    tex_coord.t = clamp(tex_coord.t, normal_texel_size, 1-normal_texel_size);
+   tex_coords.s = (tesselated_position.x - object_bounds.x) / (object_bounds.y - object_bounds.x);
+   tex_coords.t = (tesselated_position.z - object_bounds.z) / (object_bounds.w - object_bounds.z);
+   tex_coords.s = clamp(tex_coords.s, normal_texel_size, 1-normal_texel_size);
+   tex_coords.t = clamp(tex_coords.t, normal_texel_size, 1-normal_texel_size);
 
-    vec4 heightmap_position = get_heightmap_pos(tesselated_position, tex_coord, max_height);
-    vec3 normal = get_normal(tex_coord, normal_texel_size, max_height);
+   vec3 normal = get_normal(tex_coords, normal_texel_size, max_height);
+   float h = texture(height_map, tex_coords).r;
 
-    vertex.world_position = heightmap_position;
-    vertex.normal = normal;
+   vec4 heightmap_position = vec4(
+      tesselated_position.x,
+      max(h, water_level) * max_height,
+      tesselated_position.z,
+      1.
+   );
 
-    gl_Position = mvp_matrix * heightmap_position;
+   vertex.world_position = heightmap_position;
+   if (h < water_level) {
+      vertex.normal = vec3(0., 1., 0.);
+   } else {
+      vertex.normal = normal;
+   }
+   vertex.tex_coords = tex_coords;
+   vertex.tex_weights = get_texture_weights(h, water_level);
+   gl_Position = mvp_matrix * heightmap_position;
 }
 
 
