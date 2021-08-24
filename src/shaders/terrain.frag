@@ -1,23 +1,28 @@
-#version 400
+#version 330
 
 
 uniform vec3 light_pos;
 
+uniform sampler2D sand_tex;
+uniform sampler2D grass_tex;
+uniform sampler2D snow_tex;
+
 in FRAG_DATA {
+   smooth vec4 diffuse_color;
    smooth vec4 world_position;
-   flat vec3 normal;
+   smooth vec3 normal;
 } data;
 
 void main() 
 {
-   vec3 base_color = vec3(1, 1, 1);
-   vec3 diffuse_color = vec3(0, 0, 0);
-
-   vec3 light_dir = normalize(light_pos - data.world_position.xyz);
-   float n_dot_l = dot(data.normal, light_dir);
-   // gl_FragColor = vec4(data.diffuse, 0, 1, 1);
-   gl_FragColor = vec4(n_dot_l * base_color, 1);
+   gl_FragColor = data.diffuse_color;
+   // gl_FragColor = vec4(data.normal, 1);
+   // gl_FragColor = vec4(data.world_position.xyz / 100, 1);
    // gl_FragColor = vec4(n_dot_l, 0, 1, 1);
+   // gl_FragColor = vec4(data.world_position.xyz / 100, 1);
+   // gl_FragColor = vec4(0, 0, data.world_position.x / 100, 1);
+   // gl_FragColor = vec4(data.world_position.x / 100, -data.world_position.z / 100, 0, 1);
+
 }
 
 // vim: set ft=glsl:

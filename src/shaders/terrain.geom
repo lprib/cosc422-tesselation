@@ -4,22 +4,29 @@ layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
 
 in VERTEX_DATA {
-    vec4 world_position;
+   vec4 world_position;
+   vec3 normal;
 } verts[];
 
 out FRAG_DATA {
+   smooth vec4 diffuse_color;
    smooth vec4 world_position;
-   flat vec3 normal;
+   smooth vec3 normal;
 } out_frag_data;
 
+uniform vec3 light_pos;
+
 void main() {
-   vec3 norm = normalize(cross(
-      verts[1].world_position.xyz - verts[0].world_position.xyz,
-      verts[2].world_position.xyz - verts[0].world_position.xyz
-   ));
+   vec3 diffuse_color = vec3(1., 1., 1.);
 
    for(int i = 0; i < gl_in.length(); i++) {
-      out_frag_data.normal = norm;
+      vec3 light_dir = normalize(light_pos - verts[i].world_position.xyz);
+      float n_dot_l = dot(light_dir, verts[i].normal);
+      out_frag_data.diffuse_color = vec4(n_dot_l * diffuse_color, 1);
+      // out_frag_data.diffuse_color = vec4(verts[i].normal, 1);
+      // out_frag_data.diffuse_color = vec4(verts[i].color, 1);
+
+
       out_frag_data.world_position = verts[i].world_position;
       gl_Position = gl_in[i].gl_Position;
       EmitVertex();

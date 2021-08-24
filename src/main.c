@@ -12,21 +12,19 @@
 int old_elapsed_time = 0;
 mat4 proj_matrix;
 
-void
-init()
+void init()
 {
     glm_perspective(30.0 * 3.14159265 / 180.0, 1.25, 5.0, 500.0, proj_matrix);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     terrain_init();
 }
 
-void
-update(int value)
+void update(int value)
 {
     int elapsed_time = glutGet(GLUT_ELAPSED_TIME);
     int delta = elapsed_time - old_elapsed_time;
@@ -36,8 +34,7 @@ update(int value)
     camera_update(deltaSeconds);
 }
 
-void
-display()
+void display()
 {
     mat4 view_proj_matrix;
     glm_mat4_mul(proj_matrix, camera_get_view_matrix(), view_proj_matrix);
@@ -47,8 +44,7 @@ display()
     glFlush();
 }
 
-void
-gl_context_init(int argc, char** argv)
+void gl_context_init(int argc, char** argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_DEPTH);
@@ -66,8 +62,7 @@ gl_context_init(int argc, char** argv)
     }
 }
 
-int
-main(int argc, char** argv)
+int main(int argc, char** argv)
 {
     gl_context_init(argc, argv);
     init();

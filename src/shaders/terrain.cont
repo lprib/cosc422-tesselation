@@ -3,27 +3,45 @@
 layout(vertices = 4) out;
 
 uniform vec3 camera_pos;
+uniform float patch_point_spacing;
+
+const float dmin = 20.0;
+const float dmax = 120.0;
+const float tess_min = 1.0;
+const float tess_max = 100.0;
+
+int get_tess_level(vec4 center) {
+    float dist = distance(vec4(camera_pos, 0.0), center);
+
+    int level = int(clamp((dist - dmin) / (dmax - dmin) * (tess_min - tess_max) + tess_max, tess_min, tess_max));
+    // level = 100;
+    return level;
+}
 
 void main()
 {
-    vec4 patch_center = (    gl_in[0].gl_Position 
-                  + gl_in[1].gl_Position 
-                  + gl_in[2].gl_Position 
-                  + gl_in[3].gl_Position ) * 0.25;
+    vec4 patch_center = (
+        gl_in[0].gl_Position 
+        + gl_in[1].gl_Position 
+        + gl_in[2].gl_Position 
+        + gl_in[3].gl_Position ) * 0.25;
 
-    float dist = distance(vec4(camera_pos, 0.0), patch_center);
-    float dmin = 30.0;
-    float dmax = 80.0;
-    float tess_min = 2.0;
-    float tess_max = 140.0;
+    int level = get_tess_level(patch_center);
 
-    int level = int(clamp((dist - dmin) / (dmax - dmin) * (tess_min - tess_max) + tess_max, tess_min, tess_max));
-    // int level = int(camera_pos.x);
+    // TODO this must correspond to patch size
+    vec4 off = vec4(patch_point_spacing, 0., 0., 0.);
+    int base_level = get_tess_level(patch_center);
+    int level_left = max(level, get_tess_level(patch_center - off.xyyy));
+    int level_down = max(level, get_tess_level(patch_center - off.yyxy));
+    int level_right = max(level, get_tess_level(patch_center + off.xyyy));
+    int level_up = max(level, get_tess_level(patch_center + off.yyxy));
+    // level = 1;
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
-    gl_TessLevelOuter[0] = level;
-    gl_TessLevelOuter[1] = level;
-    gl_TessLevelOuter[2] = level;
-    gl_TessLevelOuter[3] = level;
+    gl_TessLevelOuter[0] = level_left;
+    gl_TessLevelOuter[3] = level_down;
+    gl_TessLevelOuter[2] = level_right;
+    gl_TessLevelOuter[1] = level_up;
+
     gl_TessLevelInner[0] = level;
     gl_TessLevelInner[1] = level;
 }

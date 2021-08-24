@@ -10,32 +10,60 @@ uniform vec4 object_bounds;
 
 out VERTEX_DATA {
     vec4 world_position;
+    vec3 normal;
 } vertex;
+
+vec3 get_normal(vec2 tex_coord, float texel_size, float texel_aspect) {
+    vec4 h;
+    h.x = texture(height_map, tex_coord + texel_size*vec2(0., -1.)).r * texel_aspect;
+    h.y = texture(height_map, tex_coord + texel_size*vec2(-1., 0.)).r * texel_aspect;
+    h.z = texture(height_map, tex_coord + texel_size*vec2(1., 0.)).r * texel_aspect;
+    h.w = texture(height_map, tex_coord + texel_size*vec2(0., 1.)).r * texel_aspect;
+
+    vec3 n;
+    n.z = h.x - h.w;
+    n.x = h.y - h.z;
+    n.y = 2;
+
+    return normalize(n);
+}
+
+vec4 get_heightmap_pos(vec4 tesselated_position, vec2 tex_coord, float max_height) {
+    vec4 heighmap_position;
+    float height = texture(height_map, tex_coord).r * max_height;
+
+    return vec4(tesselated_position.x, height, tesselated_position.z, 1.);
+}
 
 void main()
 {
     vec4 tesselated_position;
-    vec2 tcoord;
-
-
+    vec2 tex_coord;
     float u = gl_TessCoord.x;
     float v = gl_TessCoord.y;
+    float max_height = 10.;
+    float texture_width = 1024.;
+    float normal_texel_size = 5./texture_width;
 
     tesselated_position = (1-u) * (1-v) *  gl_in[0].gl_Position
         + u * (1-v) *       gl_in[1].gl_Position
         + u * v *           gl_in[2].gl_Position
         + (1-u) * v *       gl_in[3].gl_Position;
 
-    tcoord.s = (tesselated_position.x - object_bounds.x) / (object_bounds.y - object_bounds.x);
-    tcoord.t = (tesselated_position.z - object_bounds.z) / (object_bounds.w - object_bounds.z);
+    tex_coord.s = (tesselated_position.x - object_bounds.x) / (object_bounds.y - object_bounds.x);
+    tex_coord.t = (tesselated_position.z - object_bounds.z) / (object_bounds.w - object_bounds.z);
+    tex_coord.s = clamp(tex_coord.s, normal_texel_size, 1-normal_texel_size);
+    tex_coord.t = clamp(tex_coord.t, normal_texel_size, 1-normal_texel_size);
 
-    float height = texture(height_map, tcoord).r;
-    tesselated_position.y = height * 10.0;
+    vec4 heightmap_position = get_heightmap_pos(tesselated_position, tex_coord, max_height);
+    vec3 normal = get_normal(tex_coord, normal_texel_size, max_height);
 
-    vertex.world_position = tesselated_position;
-    gl_Position = mvp_matrix * tesselated_position;
-    // gl_Position = tesselated_position;
+    vertex.world_position = heightmap_position;
+    vertex.normal = normal;
+
+    gl_Position = mvp_matrix * heightmap_position;
 }
+
 
 // vim: set ft=glsl:
 

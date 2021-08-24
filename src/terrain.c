@@ -8,7 +8,6 @@ GLuint vao_id;
 
 GLuint mvp_matrix_uniform;
 GLuint camera_pos_uniform;
-GLuint height_map_uniform;
 
 #define MAP_WIDTH 10
 #define MAP_HEIGHT 10
@@ -22,8 +21,7 @@ GLuint height_map_uniform;
 static float verts[NUM_VERTS * 3];
 static GLushort vert_indices[NUM_PATCHES * VERTS_PER_PATCH];
 
-void
-generate_data()
+void generate_data()
 {
     int index, start;
 
@@ -48,44 +46,62 @@ generate_data()
     }
 }
 
-void
-load_textures()
+void load_texture(GLuint uniform, GLuint texture_unit, char* filename)
 {
     GLuint texture_id;
     glGenTextures(1, &texture_id);
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE0 + texture_unit);
     glBindTexture(GL_TEXTURE_2D, texture_id);
-    /* load_bmp("terrain.bmp"); */
-    load_tga("terrain.tga");
+    load_bmp(filename);
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glUniform1i(uniform, texture_unit);
 }
 
-void
-terrain_init()
+void terrain_init()
 {
-    load_textures();
     generate_data();
 
     GLint program = compile_program(
-        "src/shaders/terrain.vert", "src/shaders/terrain.frag",
-        "src/shaders/terrain.cont", "src/shaders/terrain.eval",
+        "src/shaders/terrain.vert",
+        "src/shaders/terrain.frag",
+        "src/shaders/terrain.cont",
+        "src/shaders/terrain.eval",
         "src/shaders/terrain.geom");
     glUseProgram(program);
 
     mvp_matrix_uniform = glGetUniformLocation(program, "mvp_matrix");
     camera_pos_uniform = glGetUniformLocation(program, "camera_pos");
-    height_map_uniform = glGetUniformLocation(program, "height_map");
-    GLuint object_bounds_uniform =
-        glGetUniformLocation(program, "object_bounds");
-    GLuint light_pos_uniform = glGetUniformLocation(program, "light_pos");
 
     glUniform4f(
-        object_bounds_uniform, 0, MAP_WIDTH * VERT_SPACING, 0,
-        MAP_HEIGHT * VERTS_PER_PATCH);
-    glUniform3f(light_pos_uniform, 0.0, 0.0, 0.0);
-    glUniform1i(height_map_uniform, 0);
+        glGetUniformLocation(program, "object_bounds"),
+        0.0,
+        (MAP_HEIGHT - 1) * VERT_SPACING,
+        0.0,
+        -(MAP_WIDTH - 1) * VERT_SPACING);
+
+    glUniform3f(glGetUniformLocation(program, "light_pos"), -50.0, 30.0, 50.0);
+    glUniform1f(
+        glGetUniformLocation(program, "patch_point_spacing"),
+        VERT_SPACING);
+
+    load_texture(
+        glGetUniformLocation(program, "height_map"),
+        0,
+        "assets/terrain.bmp");
+    load_texture(
+        glGetUniformLocation(program, "grass_tex"),
+        1,
+        "assets/grass.bmp");
+    load_texture(
+        glGetUniformLocation(program, "sand_tex"),
+        2,
+        "assets/sand.bmp");
+    load_texture(
+        glGetUniformLocation(program, "snow_tex"),
+        3,
+        "assets/snow.bmp");
 
     glGenVertexArrays(1, &vao_id);
     glBindVertexArray(vao_id);
@@ -100,7 +116,9 @@ terrain_init()
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_id[1]);
     glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER, sizeof(vert_indices), vert_indices,
+        GL_ELEMENT_ARRAY_BUFFER,
+        sizeof(vert_indices),
+        vert_indices,
         GL_STATIC_DRAW);
 
     glBindVertexArray(0);
@@ -109,15 +127,23 @@ terrain_init()
     // glPatchParameteri(GL_QUADS, VERTS_PER_PATCH);
 }
 
-void
-terrain_display(mat4 view_proj_matrix, vec3 camera_pos)
+void terrain_display(mat4 view_proj_matrix, vec3 camera_pos)
 {
     glUniformMatrix4fv(
-        mvp_matrix_uniform, 1, GL_FALSE, &view_proj_matrix[0][0]);
+        mvp_matrix_uniform,
+        1,
+        GL_FALSE,
+        &view_proj_matrix[0][0]);
     glUniform3f(
-        camera_pos_uniform, camera_pos[0], camera_pos[1], camera_pos[2]);
+        camera_pos_uniform,
+        camera_pos[0],
+        camera_pos[1],
+        camera_pos[2]);
 
     glBindVertexArray(vao_id);
     glDrawElements(
-        GL_PATCHES, NUM_PATCHES * VERTS_PER_PATCH, GL_UNSIGNED_SHORT, NULL);
+        GL_PATCHES,
+        NUM_PATCHES * VERTS_PER_PATCH,
+        GL_UNSIGNED_SHORT,
+        NULL);
 }
