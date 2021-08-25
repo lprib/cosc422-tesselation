@@ -105,18 +105,18 @@ terrain_init()
     load_texture(
         glGetUniformLocation(program, "grass_tex"),
         1,
-        "assets/grass.bmp",
-        false);
+        "assets/grass.tga",
+        true);
     load_texture(
         glGetUniformLocation(program, "sand_tex"),
         2,
-        "assets/sand.bmp",
-        false);
+        "assets/sand.tga",
+        true);
     load_texture(
         glGetUniformLocation(program, "snow_tex"),
         3,
-        "assets/snow.bmp",
-        false);
+        "assets/snow.tga",
+        true);
     load_water_textures(water_normal_uniform, 4);
 
     glGenVertexArrays(1, &vao_id);
