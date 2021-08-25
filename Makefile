@@ -11,6 +11,7 @@ CFLAGS += -L./cglm/build -l:libcglm.a
 endif
 
 out/%.o: src/%.c
+	@mkdir -p ./out
 	gcc $(CFLAGS) -c $< -o $@
 
 $(MAIN_TARGET): $(OBJ_FILES)
