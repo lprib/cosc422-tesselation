@@ -20,6 +20,7 @@ void main()
 {
    const float diffuse_shading_intensity = 0.8;
    const float texture_zoom = 10;
+   const float water_texture_zoom = 20;
    const vec4 water_color = vec4(0.1, 0.4, 0.6, 1.);
    const float water_diffuse_normal_strength = 0.1;
    const vec4 specular_color = vec4(1., 1., 1., 1.);
@@ -34,7 +35,7 @@ void main()
       data.normal,
       mix(
          vec3(0., 1., 0.),
-         texture(water_normal, data.tex_coords * texture_zoom).xyz,
+         texture(water_normal, data.tex_coords * water_texture_zoom).xyz,
          water_diffuse_normal_strength
       ),
       data.tex_weights.w
@@ -45,7 +46,7 @@ void main()
 
    vec3 specular_normal = mix(
       data.normal,
-      texture(water_normal, data.tex_coords * texture_zoom).xyz,
+      texture(water_normal, data.tex_coords * water_texture_zoom).xyz,
       data.tex_weights.w
    );
    vec3 r = normalize(reflect(light_dir, specular_normal));

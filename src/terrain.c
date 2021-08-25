@@ -62,6 +62,9 @@ void load_texture(GLuint uniform, GLuint texture_unit, char* filename)
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glUniform1i(uniform, texture_unit);
+#ifdef TRACE
+    printf("loaded %s as texture unit %d", filename, texture_unit);
+#endif
 }
 
 void load_water_textures(GLuint first_texture_unit)
@@ -75,7 +78,9 @@ void load_water_textures(GLuint first_texture_unit)
         glBindTexture(GL_TEXTURE_2D, water_textures[i]);
         char filename[30];
         snprintf(filename, 30, "assets/water_normal/%04d.bmp", i + 1);
+#ifdef TRACE
         printf("loading %s\n", filename);
+#endif
         load_bmp(filename);
 
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -118,7 +123,7 @@ void terrain_init()
     load_texture(
         glGetUniformLocation(program, "height_map"),
         0,
-        "assets/terrain.bmp");
+        "assets/terrain2.bmp");
     load_texture(
         glGetUniformLocation(program, "grass_tex"),
         1,
