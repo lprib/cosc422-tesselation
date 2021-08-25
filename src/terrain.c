@@ -78,6 +78,7 @@ terrain_init()
         "src/shaders/terrain.geom");
     glUseProgram(program);
 
+    // bind uniforms
     mvp_matrix_uniform = glGetUniformLocation(program, "mvp_matrix");
     camera_pos_uniform = glGetUniformLocation(program, "camera_pos");
     water_normal_uniform = glGetUniformLocation(program, "water_normal");
@@ -104,6 +105,8 @@ terrain_init()
         glGetUniformLocation(program, "patch_point_spacing"),
         VERT_SPACING);
 
+    // load textures
+
     load_texture(height_map_uniform, 1, "assets/terrain.tga", true);
     // load this one second since it should be the intiial state
     load_texture(height_map_uniform, 0, "assets/terrain2.tga", true);
@@ -125,6 +128,7 @@ terrain_init()
         true);
     load_water_textures(water_normal_uniform, 5);
 
+    // bind geometry
     glGenVertexArrays(1, &vao_id);
     glBindVertexArray(vao_id);
 
@@ -172,6 +176,7 @@ terrain_display(mat4 view_proj_matrix, vec3 camera_pos)
         NULL);
 }
 
+// Update water animation
 void
 terrain_update(double delta)
 {
@@ -186,6 +191,7 @@ terrain_update(double delta)
     }
 }
 
+// clamp water/snow levels to range, update uniforms
 static void
 update_levels()
 {
@@ -240,6 +246,7 @@ process_keys(unsigned char key, int x, int y)
     }
 }
 
+// generate vertices and patches
 static void
 generate_geometry()
 {
@@ -266,6 +273,8 @@ generate_geometry()
     }
 }
 
+// Load `filename` into texture `texture_unit`. Bind `texture_unit` to
+// `uniform`. Loads TGA is `is_tga`, otherwise load BMP.
 static void
 load_texture(GLuint uniform, GLuint texture_unit, char* filename, bool is_tga)
 {
@@ -287,6 +296,8 @@ load_texture(GLuint uniform, GLuint texture_unit, char* filename, bool is_tga)
     glUniform1i(uniform, texture_unit);
 }
 
+// Load all water textures in `assets/water_normal` to a texture 2D array in
+// `texture_unit`. Bind this unit to `uniform`.
 static void
 load_water_textures(GLuint uniform, GLuint texture_unit)
 {
