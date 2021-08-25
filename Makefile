@@ -4,6 +4,12 @@ OBJ_FILES = $(addprefix out/,$(notdir $(SRC_FILES:.c=.o)))
 MAIN_TARGET = out/main
 CFLAGS = -lGL -lGLU -lGLEW -lglut -lm -Wall
 
+# to build with system CGLM, run `make SYSTEM_CGLM=1`
+ifndef SYSTEM_CGLM
+CFLAGS += -I./cglm/include
+CFLAGS += -L./cglm/build -l:libcglm.a
+endif
+
 out/%.o: src/%.c
 	gcc $(CFLAGS) -c $< -o $@
 
@@ -18,4 +24,9 @@ clean:
 run: all
 	$(MAIN_TARGET)
 
-.PHONY: all clean run
+cglm_build:
+	git submodule init
+	git submodule update
+	cd cglm && mkdir -p build && cd build && cmake -DCGLM_STATIC=ON .. && make
+
+.PHONY: all clean run cglm_build
