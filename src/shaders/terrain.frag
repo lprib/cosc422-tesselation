@@ -25,8 +25,8 @@ const float water_diffuse_normal_strength = 0.3;
 const float specular_power = 200.0;
 const vec4 specular_color = 0.6 * vec4(0.9, 0.85, 0.7, 1.0);
 
-const vec4 water_color_shallow = vec4(0.61, 1., 1., 1.);
-const vec4 water_color_deep = vec4(0., 0., 0.1, 0.4);
+const vec4 water_color_shallow = vec4(0.51, 0.9, 1., 1.);
+const vec4 water_color_deep = vec4(0., 0., 0.05, 0.1);
 
 void main() 
 {

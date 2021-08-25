@@ -98,7 +98,6 @@ void main()
 
    vec3 normal = get_normal(tex_coords, normal_texel_size, max_height);
    float h = texture(height_map, tex_coords).r;
-   // h = 0.;
 
    vec4 heightmap_position = vec4(
       tesselated_position.x,
@@ -116,8 +115,19 @@ void main()
    vertex.tex_coords = tex_coords;
    vertex.tex_weights = get_texture_weights(h);
 
-   // apply fractional power to depth value for better color grading
-   vertex.water_depth = pow(clamp((water_level + transition_water - h), 0., 1.), 0.3);
+   // absolute water level varies with the user controlled depth value
+   float absolute_water_level = water_level + transition_water - h;
+
+   // relative water level is independent of user depth, and is always less
+   // closer to the coastline
+   float relative_water_level = clamp(
+      (water_level + transition_water - h) / (water_level + transition_water),
+      0.,
+      1.
+   );
+   // mix relative and absolute, and apply power scaling to the relative to get
+   // better color grading / dropoff
+   vertex.water_depth = mix(absolute_water_level, pow(relative_water_level, 0.7), 0.5);
 
    gl_Position = mvp_matrix * heightmap_position;
 }

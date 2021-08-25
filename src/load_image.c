@@ -41,7 +41,6 @@ load_tga(char* filename)
 
     nbytes = bpp / 8;
     size = width * height * nbytes;
-    printf("%d %d %d %d\n", width, height, size, nbytes);
     image_data = (char*)malloc(sizeof(char) * size);
     fread(image_data, sizeof(char), size, file);
 

@@ -7,7 +7,7 @@ uniform float patch_point_spacing;
 
 const float dmin = 10.0;
 const float dmax = 120.0;
-const float tess_min = 10.0;
+const float tess_min = 8.0;
 const float tess_max = 100.0;
 
 // return the tesselation level for the patch quad centered at `center`.
