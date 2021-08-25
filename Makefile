@@ -26,8 +26,6 @@ run: all
 	$(MAIN_TARGET)
 
 cglm_build:
-	git submodule init
-	git submodule update
 	cd cglm && mkdir -p build && cd build && cmake -DCGLM_STATIC=ON .. && make
 
 .PHONY: all clean run cglm_build
