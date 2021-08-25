@@ -8,7 +8,7 @@ AllowAllArgumentsOnNextLine: false
 # Braces on the same line, except for functions
 BreakBeforeBraces: Linux
 
-AlwaysBreakAfterReturnType: None
+AlwaysBreakAfterReturnType: All
 
 SortIncludes: false
 

@@ -4,6 +4,8 @@ layout(quads, equal_spacing, ccw) in;
 
 uniform mat4 mvp_matrix;
 uniform sampler2D height_map;
+uniform float water_level;
+uniform float snow_level;
 
 // x: xmin, y: xmax, z: zmin, w: zmax
 uniform vec4 object_bounds;
@@ -13,7 +15,10 @@ out VERTEX_DATA {
    vec3 normal;
    vec2 tex_coords;
    vec4 tex_weights;
+   float water_depth;
 } vertex;
+
+const float transition_water = 0.005;
 
 vec3 get_normal(vec2 tex_coords, float texel_size, float texel_aspect) {
    vec4 h;
@@ -31,14 +36,17 @@ vec3 get_normal(vec2 tex_coords, float texel_size, float texel_aspect) {
 }
 
 // x = sand, y = grass, z = snow, w = water (bool)
-vec4 get_texture_weights(float h, float water_level) {
+vec4 get_texture_weights(float h) {
    // transitions happen AFTER the boundary has been passed
-   const float boundary_1 = 0.45;
-   const float transition_1 = 0.02;
-   const float boundary_2 = 0.6;
-   const float transition_2 = 0.3;
 
-   const float transition_water = 0.01;
+   // sand to grass boundary
+   const float boundary_1 = 0.35;
+   const float transition_1 = 0.02;
+
+   // grass to snow boundary
+   float boundary_2 = snow_level;
+   const float transition_2 = 0.2;
+
 
    vec4 ret;
    if(h < boundary_1) {
@@ -71,7 +79,6 @@ void main()
    float u = gl_TessCoord.x;
    float v = gl_TessCoord.y;
    // scale of 0 to 1
-   const float water_level = 0.4;
    const float max_height = 10.;
    const float texture_width = 1024.;
    const float normal_texel_size = 1./texture_width;
@@ -103,7 +110,8 @@ void main()
       vertex.normal = normal;
    }
    vertex.tex_coords = tex_coords;
-   vertex.tex_weights = get_texture_weights(h, water_level);
+   vertex.tex_weights = get_texture_weights(h);
+   vertex.water_depth = (water_level + transition_water - h) / (water_level + transition_water);
    gl_Position = mvp_matrix * heightmap_position;
 }
 

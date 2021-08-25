@@ -8,6 +8,7 @@ in VERTEX_DATA {
    vec3 normal;
    vec2 tex_coords;
    vec4 tex_weights;
+   float water_depth;
 } verts[];
 
 out FRAG_DATA {
@@ -15,6 +16,7 @@ out FRAG_DATA {
    smooth vec3 normal;
    smooth vec2 tex_coords;
    smooth vec4 tex_weights;
+   smooth float water_depth;
 } frag;
 
 void main() {
@@ -23,6 +25,7 @@ void main() {
       frag.normal = verts[i].normal;
       frag.tex_coords = verts[i].tex_coords;
       frag.tex_weights = verts[i].tex_weights;
+      frag.water_depth = verts[i].water_depth;
       gl_Position = gl_in[i].gl_Position;
       EmitVertex();
    }

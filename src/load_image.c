@@ -58,17 +58,38 @@ load_tga(char* filename)
     switch (nbytes) {
     case 1:
         glTexImage2D(
-            GL_TEXTURE_2D, 0, 1, width, height, 0, GL_LUMINANCE,
-            GL_UNSIGNED_BYTE, image_data);
+            GL_TEXTURE_2D,
+            0,
+            1,
+            width,
+            height,
+            0,
+            GL_LUMINANCE,
+            GL_UNSIGNED_BYTE,
+            image_data);
         break;
     case 3:
         glTexImage2D(
-            GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE,
+            GL_TEXTURE_2D,
+            0,
+            3,
+            width,
+            height,
+            0,
+            GL_RGB,
+            GL_UNSIGNED_BYTE,
             image_data);
         break;
     case 4:
         glTexImage2D(
-            GL_TEXTURE_2D, 0, 4, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+            GL_TEXTURE_2D,
+            0,
+            4,
+            width,
+            height,
+            0,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
             image_data);
         break;
     }
@@ -113,7 +134,14 @@ load_bmp(char* filename)
         imageData[index + 2] = temp;
     }
     glTexImage2D(
-        GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE,
+        GL_TEXTURE_2D,
+        0,
+        3,
+        width,
+        height,
+        0,
+        GL_RGB,
+        GL_UNSIGNED_BYTE,
         imageData);
     free(imageData);
 }

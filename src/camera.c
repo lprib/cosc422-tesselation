@@ -20,8 +20,6 @@ static double look_z = 0.0;
 
 static mat4 view_matrix;
 
-static double aspect_ratio;
-
 // Which keys are currently held down (left, right, up, down) arrows
 // respectively
 static bool keysDown[] = {false, false, false, false};
@@ -48,19 +46,19 @@ update_key_array(int key, bool press)
     }
 }
 
-void
+static void
 camera_special_keys(int key, int x, int y)
 {
     update_key_array(key, true);
 }
 
-void
+static void
 camera_special_keys_up(int key, int x, int y)
 {
     update_key_array(key, false);
 }
 
-void
+static void
 update_look_dir()
 {
     look_x = sin(angle);
@@ -114,9 +112,11 @@ camera_get_view_matrix()
     glm_lookat(
         pos,
         (vec3){
-            pos[0] + LOOK_DISTANCE * look_x, 1.0f,
+            pos[0] + LOOK_DISTANCE * look_x,
+            1.0f,
             pos[2] + LOOK_DISTANCE * look_z},
-        (vec3){0.0f, 1.0f, 0.0f}, view_matrix);
+        (vec3){0.0f, 1.0f, 0.0f},
+        view_matrix);
     return view_matrix;
 }
 

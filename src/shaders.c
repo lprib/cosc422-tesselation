@@ -37,7 +37,6 @@ load_shader(GLenum shader_type, char* filename)
         GLchar* info_log = (GLchar*)malloc(sizeof(GLchar) * (info_log_len + 1));
         memset(info_log, 0, info_log_len + 1);
         glGetShaderInfoLog(shader, info_log_len, NULL, info_log);
-        const char* strShaderType = NULL;
         printf("Comile error in shader %s: %s\n", filename, info_log);
         free(info_log);
         exit(EXIT_FAILURE);
