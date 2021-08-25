@@ -96,8 +96,8 @@ load_tga(char* filename)
     free(image_data);
 }
 
-void
-load_bmp(char* filename)
+char*
+load_bmp_to_array(char* filename, int* out_width, int* out_height)
 {
     char* imageData;
     char header1[18];
@@ -133,6 +133,17 @@ load_bmp(char* filename)
         imageData[index] = imageData[index + 2];
         imageData[index + 2] = temp;
     }
+
+    *out_width = width;
+    *out_height = height;
+    return imageData;
+}
+
+void
+load_bmp(char* filename)
+{
+    int width, height;
+    char* image_data = load_bmp_to_array(filename, &width, &height);
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
@@ -142,6 +153,6 @@ load_bmp(char* filename)
         0,
         GL_RGB,
         GL_UNSIGNED_BYTE,
-        imageData);
-    free(imageData);
+        image_data);
+    free(image_data);
 }

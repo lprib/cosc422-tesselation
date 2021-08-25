@@ -6,9 +6,9 @@
 #include <stdbool.h>
 
 // In units per second (used with frame delta time)
-#define MOVE_SPEED 50
+#define MOVE_SPEED 20
 #define ANGLE_SPEED 1.5
-#define LOOK_DISTANCE 90.0
+#define LOOK_DISTANCE 50.0
 
 // camera angle
 static double angle = M_PI / 4.0;

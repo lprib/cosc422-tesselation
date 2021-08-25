@@ -81,7 +81,7 @@ void main()
    // scale of 0 to 1
    const float max_height = 10.;
    const float texture_width = 1024.;
-   const float normal_texel_size = 1./texture_width;
+   const float normal_texel_size = 5./texture_width;
 
    tesselated_position = (1-u) * (1-v) *  gl_in[0].gl_Position
       + u * (1-v) *      gl_in[1].gl_Position
