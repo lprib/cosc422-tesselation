@@ -13,8 +13,10 @@ static GLuint camera_pos_uniform;
 static GLuint water_animation_idx_uniform;
 
 // Geometry parameters
-#define MAP_WIDTH 10
-#define MAP_HEIGHT 10
+#define MAP_OFFSET_X 0
+#define MAP_OFFSET_Z 0
+#define MAP_WIDTH 11
+#define MAP_HEIGHT 11
 #define VERT_SPACING 10
 #define NUM_VERTS (MAP_WIDTH * MAP_HEIGHT)
 #define NUM_PATCHES ((MAP_WIDTH - 1) * (MAP_HEIGHT - 1))
@@ -52,9 +54,9 @@ static void
 generate_geometry();
 
 static void
-load_texture(GLuint uniform, GLuint texture_unit, char* filename);
+load_texture(GLuint uniform, GLuint texture_unit, char* filename, bool is_tga);
 
-void
+static void
 load_water_textures(GLuint uniform, GLuint texture_unit);
 
 void
@@ -80,16 +82,17 @@ terrain_init()
 
     glUniform4f(
         glGetUniformLocation(program, "object_bounds"),
-        0.0,
-        (MAP_HEIGHT - 1) * VERT_SPACING,
-        0.0,
-        -(MAP_WIDTH - 1) * VERT_SPACING);
+        MAP_OFFSET_X,
+        (MAP_HEIGHT - 1) * VERT_SPACING + MAP_OFFSET_X,
+        MAP_OFFSET_Z,
+        -(MAP_WIDTH - 1) * VERT_SPACING + MAP_OFFSET_Z);
 
     glUniform3f(
         glGetUniformLocation(program, "light_pos"),
         -100.0,
         100.0,
         100.0);
+
     glUniform1f(
         glGetUniformLocation(program, "patch_point_spacing"),
         VERT_SPACING);
@@ -97,19 +100,23 @@ terrain_init()
     load_texture(
         glGetUniformLocation(program, "height_map"),
         0,
-        "assets/terrain2.bmp");
+        "assets/terrain2.tga",
+        true);
     load_texture(
         glGetUniformLocation(program, "grass_tex"),
         1,
-        "assets/grass.bmp");
+        "assets/grass.bmp",
+        false);
     load_texture(
         glGetUniformLocation(program, "sand_tex"),
         2,
-        "assets/sand.bmp");
+        "assets/sand.bmp",
+        false);
     load_texture(
         glGetUniformLocation(program, "snow_tex"),
         3,
-        "assets/snow.bmp");
+        "assets/snow.bmp",
+        false);
     load_water_textures(water_normal_uniform, 4);
 
     glGenVertexArrays(1, &vao_id);
@@ -233,9 +240,9 @@ generate_geometry()
     for (int i = 0; i < MAP_HEIGHT; i++) {
         for (int j = 0; j < MAP_WIDTH; j++) {
             index = MAP_WIDTH * i + j;
-            verts[3 * index] = VERT_SPACING * i;
+            verts[3 * index] = VERT_SPACING * i + MAP_OFFSET_X;
             verts[3 * index + 1] = 0;
-            verts[3 * index + 2] = -VERT_SPACING * j;
+            verts[3 * index + 2] = -VERT_SPACING * j + MAP_OFFSET_Z;
         }
     }
 
@@ -252,7 +259,7 @@ generate_geometry()
 }
 
 static void
-load_texture(GLuint uniform, GLuint texture_unit, char* filename)
+load_texture(GLuint uniform, GLuint texture_unit, char* filename, bool is_tga)
 {
 #ifdef TRACE
     printf("loading %s as texture unit %d\n", filename, texture_unit);
@@ -261,14 +268,18 @@ load_texture(GLuint uniform, GLuint texture_unit, char* filename)
     glGenTextures(1, &texture_id);
     glActiveTexture(GL_TEXTURE0 + texture_unit);
     glBindTexture(GL_TEXTURE_2D, texture_id);
-    load_bmp(filename);
+    if (is_tga) {
+        load_tga(filename);
+    } else {
+        load_bmp(filename);
+    }
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glUniform1i(uniform, texture_unit);
 }
 
-void
+static void
 load_water_textures(GLuint uniform, GLuint texture_unit)
 {
     GLuint texture_id;
@@ -298,7 +309,6 @@ load_water_textures(GLuint uniform, GLuint texture_unit)
     glTexImage3D(
         GL_TEXTURE_2D_ARRAY,
         0,
-        // TODO should this be 3?
         GL_RGBA8,
         512,
         512,
@@ -310,23 +320,4 @@ load_water_textures(GLuint uniform, GLuint texture_unit)
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glUniform1i(uniform, texture_unit);
-
-    /* water_animation_start = first_texture_unit; */
-    /* GLuint water_textures[WATER_ANIMATION_LENGTH]; */
-    /* glGenTextures(WATER_ANIMATION_LENGTH, water_textures); */
-
-    /* for (int i = 0; i < WATER_ANIMATION_LENGTH; i++) { */
-    /* int texture_unit = GL_TEXTURE0 + first_texture_unit + i; */
-    /* glActiveTexture(texture_unit); */
-    /* glBindTexture(GL_TEXTURE_2D, water_textures[i]); */
-    /* char filename[30]; */
-    /* snprintf(filename, 30, "assets/water_normal/%04d.bmp", i + 1); */
-    /* #ifdef TRACE */
-    /* printf("loading %s as texture unit %d\n", filename, texture_unit); */
-    /* #endif */
-    /* load_bmp(filename); */
-
-    /* glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); */
-    /* glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); */
-    /* } */
 }

@@ -1,5 +1,12 @@
 #version 330
 
+in FRAG_DATA {
+   smooth vec4 world_position;
+   smooth vec3 normal;
+   smooth vec2 tex_coords;
+   smooth vec4 tex_weights;
+   smooth float water_depth;
+} data;
 
 uniform vec3 light_pos;
 uniform vec3 camera_pos;
@@ -10,25 +17,18 @@ uniform sampler2D snow_tex;
 uniform sampler2DArray water_normal;
 uniform float water_animation_idx;
 
-in FRAG_DATA {
-   smooth vec4 world_position;
-   smooth vec3 normal;
-   smooth vec2 tex_coords;
-   smooth vec4 tex_weights;
-   smooth float water_depth;
-} data;
+const float diffuse_shading_intensity = 0.8;
+const float texture_zoom = 10;
+const float water_texture_zoom = 8;
+const float water_diffuse_normal_strength = 0.3;
+const float specular_power = 135.0;
+
+const vec4 specular_color = vec4(1., 1., 1., 1.);
+const vec4 water_color_shallow = vec4(0.41, 0.9, 1., 1.);
+const vec4 water_color_deep = vec4(0., 0., 0.1, 0.4);
 
 void main() 
 {
-   const float diffuse_shading_intensity = 0.8;
-   const float texture_zoom = 10;
-   const float water_texture_zoom = 5;
-   const float water_diffuse_normal_strength = 0.1;
-   const float specular_power = 150.0;
-
-   const vec4 specular_color = vec4(1., 1., 1., 1.);
-   const vec4 water_color_shallow = vec4(0.41, 0.87, 0.96, 1.);
-   const vec4 water_color_deep = vec4(0., 0.07, 0.44, 1.);
 
    vec4 water_color = mix(water_color_shallow, water_color_deep, data.water_depth);
 

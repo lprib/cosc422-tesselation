@@ -11,7 +11,7 @@
 #define LOOK_DISTANCE 50.0
 
 // camera angle
-static double angle = M_PI / 4.0;
+static double angle = M_PI / 3.0;
 static vec3 pos = {0.0, 15.0, 0.0};
 
 // look vector

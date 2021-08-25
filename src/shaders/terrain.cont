@@ -5,14 +5,19 @@ layout(vertices = 4) out;
 uniform vec3 camera_pos;
 uniform float patch_point_spacing;
 
-const float dmin = 20.0;
+const float dmin = 10.0;
 const float dmax = 120.0;
 const float tess_min = 1.0;
 const float tess_max = 100.0;
 
+// return the tesselation level for the patch quad centered at `center`.
 int get_tess_level(vec4 center) {
     float dist = distance(vec4(camera_pos, 0.0), center);
-    int level = int(clamp((dist - dmin) / (dmax - dmin) * (tess_min - tess_max) + tess_max, tess_min, tess_max));
+    int level = int(clamp(
+        (dist - dmin) / (dmax - dmin) * (tess_min - tess_max) + tess_max,
+        tess_min,
+        tess_max
+    ));
     return level;
 }
 
@@ -26,12 +31,15 @@ void main()
 
     int level = get_tess_level(patch_center);
 
-    vec4 off = vec4(patch_point_spacing, 0., 0., 0.);
-    int base_level = get_tess_level(patch_center);
-    int level_left = max(level, get_tess_level(patch_center - off.xyyy));
-    int level_down = max(level, get_tess_level(patch_center - off.yyxy));
-    int level_right = max(level, get_tess_level(patch_center + off.xyyy));
-    int level_up = max(level, get_tess_level(patch_center + off.yyxy));
+    // allows offsetting center by one patch
+    vec4 patch_offset = vec4(patch_point_spacing, 0., 0., 0.);
+
+    // calculate the tesselation levels based on neighbor patches, such that
+    // adjacent edges have the same tesselation level.
+    int level_left = max(level, get_tess_level(patch_center - patch_offset.xyyy));
+    int level_down = max(level, get_tess_level(patch_center - patch_offset.yyxy));
+    int level_right = max(level, get_tess_level(patch_center + patch_offset.xyyy));
+    int level_up = max(level, get_tess_level(patch_center + patch_offset.yyxy));
 
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
     gl_TessLevelOuter[0] = level_left;

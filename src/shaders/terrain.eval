@@ -47,27 +47,30 @@ vec4 get_texture_weights(float h) {
    float boundary_2 = snow_level;
    const float transition_2 = 0.2;
 
+   // used to select one element from vec4
+   const vec2 s = vec2(1., 0.);
+
 
    vec4 ret;
    if(h < boundary_1) {
-      ret = vec4(1., 0., 0., 0.);
+      ret = s.xyyy;
    } else if(h < boundary_1 + transition_1) {
       float lerp_val = (h - boundary_1) / transition_1;
-      ret = mix(vec4(1., 0., 0., 0.), vec4(0., 1., 0., 0.), lerp_val);
+      ret = mix(s.xyyy, s.yxyy, lerp_val);
    } else if(h < boundary_2) {
-      ret = vec4(0., 1., 0., 0.);
+      ret = s.yxyy;
    } else if(h < boundary_2 + transition_2) {
       float lerp_val = (h - boundary_2) / transition_2;
-      ret = mix(vec4(0., 1., 0., 0.), vec4(0., 0., 1., 0.), lerp_val);
+      ret = mix(s.yxyy, s.yyxy, lerp_val);
    } else {
-      ret = vec4(0., 0., 1., 0.);
+      ret = s.yyxy;
    }
 
    if(h < water_level) {
-      ret = vec4(0., 0., 0., 1.);
+      ret = s.yyyx;
    } else if (h < water_level + transition_water) {
       float lerp_val = (h - water_level) / transition_water;
-      ret = mix(ret, vec4(0., 0., 0., 1.), 1-lerp_val);
+      ret = mix(ret, s.yyyx, 1-lerp_val);
    }
    return ret;
 }
@@ -81,7 +84,7 @@ void main()
    // scale of 0 to 1
    const float max_height = 10.;
    const float texture_width = 1024.;
-   const float normal_texel_size = 5./texture_width;
+   const float normal_texel_size = 2./texture_width;
 
    tesselated_position = (1-u) * (1-v) *  gl_in[0].gl_Position
       + u * (1-v) *      gl_in[1].gl_Position
@@ -95,6 +98,7 @@ void main()
 
    vec3 normal = get_normal(tex_coords, normal_texel_size, max_height);
    float h = texture(height_map, tex_coords).r;
+   // h = 0.;
 
    vec4 heightmap_position = vec4(
       tesselated_position.x,
@@ -111,7 +115,10 @@ void main()
    }
    vertex.tex_coords = tex_coords;
    vertex.tex_weights = get_texture_weights(h);
-   vertex.water_depth = (water_level + transition_water - h) / (water_level + transition_water);
+
+   // vertex.tex_weights = vec4(1. - distance(tex_coords, vec2(0, 0)), 0., 0., 0.);
+
+   vertex.water_depth = pow(clamp((water_level + transition_water - h), 0., 1.), 0.4);
    gl_Position = mvp_matrix * heightmap_position;
 }
 

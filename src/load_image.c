@@ -147,7 +147,7 @@ load_bmp(char* filename)
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
-        3,
+        GL_RGBA8,
         width,
         height,
         0,
