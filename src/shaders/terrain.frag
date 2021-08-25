@@ -19,12 +19,13 @@ uniform float water_animation_idx;
 
 const float diffuse_shading_intensity = 0.8;
 const float texture_zoom = 10;
-const float water_texture_zoom = 8;
+const float water_texture_zoom = 5;
 const float water_diffuse_normal_strength = 0.3;
-const float specular_power = 135.0;
 
-const vec4 specular_color = vec4(1., 1., 1., 1.);
-const vec4 water_color_shallow = vec4(0.41, 0.9, 1., 1.);
+const float specular_power = 200.0;
+const vec4 specular_color = 0.6 * vec4(0.9, 0.85, 0.7, 1.0);
+
+const vec4 water_color_shallow = vec4(0.61, 1., 1., 1.);
 const vec4 water_color_deep = vec4(0., 0., 0.1, 0.4);
 
 void main() 

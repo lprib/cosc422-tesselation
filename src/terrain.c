@@ -11,6 +11,7 @@ static GLuint vao_id;
 static GLuint mvp_matrix_uniform;
 static GLuint camera_pos_uniform;
 static GLuint water_animation_idx_uniform;
+static GLuint height_map_uniform;
 
 // Geometry parameters
 #define MAP_OFFSET_X 0
@@ -23,6 +24,11 @@ static GLuint water_animation_idx_uniform;
 #define VERTS_PER_PATCH 4
 static float verts[NUM_VERTS * 3];
 static GLushort vert_indices[NUM_PATCHES * VERTS_PER_PATCH];
+
+// light parameters
+#define LIGHT_X -150
+#define LIGHT_Y 100
+#define LIGHT_Z 50
 
 // Water animation parameters
 #define WATER_ANIMATION_LENGTH 120
@@ -37,7 +43,7 @@ static double water_animation_framerate = 15.0;
 #define WATER_LEVEL_MAX 0.99
 #define SNOW_LEVEL_MIN 0.37
 #define SNOW_LEVEL_MAX 0.8
-static float water_level = WATER_LEVEL_MIN;
+static float water_level = 0.3;
 static float snow_level = SNOW_LEVEL_MIN;
 static GLuint water_level_uniform;
 static GLuint snow_level_uniform;
@@ -79,6 +85,7 @@ terrain_init()
     snow_level_uniform = glGetUniformLocation(program, "snow_level");
     water_animation_idx_uniform =
         glGetUniformLocation(program, "water_animation_idx");
+    height_map_uniform = glGetUniformLocation(program, "height_map");
 
     glUniform4f(
         glGetUniformLocation(program, "object_bounds"),
@@ -89,35 +96,34 @@ terrain_init()
 
     glUniform3f(
         glGetUniformLocation(program, "light_pos"),
-        -100.0,
-        100.0,
-        100.0);
+        LIGHT_X,
+        LIGHT_Y,
+        LIGHT_Z);
 
     glUniform1f(
         glGetUniformLocation(program, "patch_point_spacing"),
         VERT_SPACING);
 
-    load_texture(
-        glGetUniformLocation(program, "height_map"),
-        0,
-        "assets/terrain2.tga",
-        true);
+    load_texture(height_map_uniform, 1, "assets/terrain.tga", true);
+    // load this one second since it should be the intiial state
+    load_texture(height_map_uniform, 0, "assets/terrain2.tga", true);
+
     load_texture(
         glGetUniformLocation(program, "grass_tex"),
-        1,
+        2,
         "assets/grass.tga",
         true);
     load_texture(
         glGetUniformLocation(program, "sand_tex"),
-        2,
+        3,
         "assets/sand.tga",
         true);
     load_texture(
         glGetUniformLocation(program, "snow_tex"),
-        3,
+        4,
         "assets/snow.tga",
         true);
-    load_water_textures(water_normal_uniform, 4);
+    load_water_textures(water_normal_uniform, 5);
 
     glGenVertexArrays(1, &vao_id);
     glBindVertexArray(vao_id);
@@ -226,8 +232,10 @@ process_keys(unsigned char key, int x, int y)
         }
         break;
     case '1':
+        glUniform1i(height_map_uniform, 0);
         break;
     case '2':
+        glUniform1i(height_map_uniform, 1);
         break;
     }
 }

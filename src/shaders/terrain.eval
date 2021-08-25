@@ -7,6 +7,7 @@ uniform sampler2D height_map;
 uniform float water_level;
 uniform float snow_level;
 
+// min and max for the entire terrain object
 // x: xmin, y: xmax, z: zmin, w: zmax
 uniform vec4 object_bounds;
 
@@ -20,16 +21,16 @@ out VERTEX_DATA {
 
 const float transition_water = 0.005;
 
-vec3 get_normal(vec2 tex_coords, float texel_size, float texel_aspect) {
-   vec4 h;
-   h.x = texture(height_map, tex_coords + texel_size*vec2(0., -1.)).r * texel_aspect;
-   h.y = texture(height_map, tex_coords + texel_size*vec2(-1., 0.)).r * texel_aspect;
-   h.z = texture(height_map, tex_coords + texel_size*vec2(1., 0.)).r * texel_aspect;
-   h.w = texture(height_map, tex_coords + texel_size*vec2(0., 1.)).r * texel_aspect;
+vec3 get_normal(vec2 tex_coords, float texel_size, float max_height) {
+   vec4 diff_samples;
+   diff_samples.x = texture(height_map, tex_coords + texel_size*vec2(0., -1.)).r * max_height;
+   diff_samples.y = texture(height_map, tex_coords + texel_size*vec2(-1., 0.)).r * max_height;
+   diff_samples.z = texture(height_map, tex_coords + texel_size*vec2(1., 0.)).r * max_height;
+   diff_samples.w = texture(height_map, tex_coords + texel_size*vec2(0., 1.)).r * max_height;
 
    vec3 n;
-   n.z = h.x - h.w;
-   n.x = h.y - h.z;
+   n.z = diff_samples.x - diff_samples.w;
+   n.x = diff_samples.y - diff_samples.z;
    n.y = 2;
 
    return normalize(n);
@@ -83,8 +84,7 @@ void main()
    float v = gl_TessCoord.y;
    // scale of 0 to 1
    const float max_height = 10.;
-   const float texture_width = 1024.;
-   const float normal_texel_size = 2./texture_width;
+   float normal_texel_size = 2. / textureSize(height_map, 0).x;
 
    tesselated_position = (1-u) * (1-v) *  gl_in[0].gl_Position
       + u * (1-v) *      gl_in[1].gl_Position
@@ -116,9 +116,9 @@ void main()
    vertex.tex_coords = tex_coords;
    vertex.tex_weights = get_texture_weights(h);
 
-   // vertex.tex_weights = vec4(1. - distance(tex_coords, vec2(0, 0)), 0., 0., 0.);
+   // apply fractional power to depth value for better color grading
+   vertex.water_depth = pow(clamp((water_level + transition_water - h), 0., 1.), 0.3);
 
-   vertex.water_depth = pow(clamp((water_level + transition_water - h), 0., 1.), 0.4);
    gl_Position = mvp_matrix * heightmap_position;
 }
 

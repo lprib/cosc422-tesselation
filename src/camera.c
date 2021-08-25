@@ -8,11 +8,11 @@
 // In units per second (used with frame delta time)
 #define MOVE_SPEED 20
 #define ANGLE_SPEED 1.5
-#define LOOK_DISTANCE 50.0
+#define LOOK_DISTANCE 80.0
 
 // camera angle
-static double angle = M_PI / 3.0;
-static vec3 pos = {0.0, 15.0, 0.0};
+static double angle = M_PI / 2.0;
+static vec3 pos = {0.0, 25.0, -50.0};
 
 // look vector
 static double look_x = 0.0;
